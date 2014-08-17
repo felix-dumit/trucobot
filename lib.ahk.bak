@@ -1,0 +1,152 @@
+max(x,y,z)
+{
+	
+if( x>=y and x>=z)
+	return x
+if(y>=x and y>=z)
+	return y
+if(z>=x and z>=y)
+	return z
+
+
+msgbox here
+}
+
+
+getStartCoordinates()
+{
+Global startx
+Global starty
+
+IfWinNotActive, gTruco, , WinActivate, gTruco,
+	Send,{PGUP}
+	
+IniRead, stx, files\config.ini, startcoord, startx,0
+IniRead, sty, files\config.ini, startcoord, starty,0
+
+;msgbox STT: %stx%,%sty%
+if stx<>0
+{
+	startx:=stx
+	starty:=sty
+
+}
+else{
+	
+	mousemove 0,0
+
+	IfWinNotActive, gTruco, , WinActivate, gTruco,
+		sleep 1000
+		Send,{PGUP}
+
+
+	ImageSearch, StartX, StartY, 0, 0, A_ScreenWidth, A_ScreenHeight, *48 img\_screen\gTruco.png
+
+	IniWrite %StartX%,config.ini,startcoord,startx
+	IniWrite %StartY%,config.ini,startcoord,starty
+}
+
+
+}
+
+
+getSuit(x=0,y=0,z=0){
+global startx
+global starty
+
+xx:=startx+x
+yy:=starty+y
+
+;mousemove xx-z,yy-z
+	
+	Loop img\_suits\*.png
+	{
+		
+		;mousemove, xx,yy
+		ImageSearch, foundx, foundy, xx , yy , xx+18 +z, yy+20 +z, *48 img\_suits\%A_LoopFileName%
+		;sleep 1000
+		;mousemove, xx+18+z,yy+20+z
+			if ErrorLevel=0
+			{					
+				StringTrimRight, suit, A_loopFileName, 4
+				return suit
+			}
+	}
+	
+		Loop img\_suits\*.png
+		{
+		
+		ImageSearch, foundx, foundy, xx , yy , xx+18 +z, yy+20 +z, *180 img\_suits\%A_LoopFileName%
+
+			if ErrorLevel=0
+			{					
+				StringTrimRight, suit, A_loopFileName, 4
+				return suit
+			}
+	}
+	
+	
+}
+
+
+getCard(x=0,y=0,z=0){
+global startx
+global starty
+
+suit:= getSuit(x,y+19,z)
+;msgbox %suit%
+	Loop img\%suit%\*.png
+	{
+		
+		ImageSearch, foundx, foundy, startx+x , starty+y , startx+x+18 +z, starty+y+36 +z, *48 img\%suit%\%A_LoopFileName%
+			if ErrorLevel=0				
+			{
+					
+				StringTrimRight, card, A_loopFileName, 4
+				return card
+			}
+	}
+	
+	Loop img\%suit%\*.png
+	{
+		
+		ImageSearch, foundx, foundy, startx+x , starty+y , startx+x+18 +z, starty+y+36 +z, *180 img\%suit%\%A_LoopFileName%
+			if ErrorLevel =0
+			{
+					
+				StringTrimRight, card, A_loopFileName, 4
+				;card=$%card%
+				return card
+			}			
+	}
+
+	ret=#
+	ImageSearch, foundx, foundy, startx+x -10, starty+y -10, startx+x+50 +z, starty+y+50 +z, *180 img\_screen\_back.png
+	;msgbox %errorlevel%||
+	if ErrorLevel	
+		return 0	
+	return ret	
+}
+
+playPlayerCard(card, cover=""){
+global startx
+global starty
+
+
+StringSplit kard,card,,
+num:=kard1
+suit:=kard2
+
+ImageSearch, cardx,cardy,startx+441,starty+440,startx+440+60,starty+441+60, *48 img\%suit%\%card%.png
+;mousemove cardx,cardy
+
+if(cover){
+	MouseClick,L, cardx+3,cardy+55
+
+	
+}
+else MouseClick,L, cardx,cardy
+
+MouseMove 0,0
+
+}
